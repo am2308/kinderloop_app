@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function SellItem() {
   const [item, setItem] = useState({
@@ -18,6 +19,7 @@ export default function SellItem() {
   });
 
   const [error, setError] = useState("");
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [finalPrice, setFinalPrice] = useState<number | null>(null); // State to store final price after deductions
   const [isUploading, setIsUploading] = useState(false); // State to track image upload progress
@@ -65,11 +67,16 @@ export default function SellItem() {
         });
   
         const { presignedUrl, fileUrl } = response.data;
+        console.log("Generated Pre-signed URL:", presignedUrl);
+        console.log("Expected File URL:", fileUrl);
+        console.log("Uploading file:", file.name, "Type:", file.type);
+
   
         // Upload the file to S3 using the pre-signed URL
         await axios.put(presignedUrl, file, {
           headers: {
             "Content-Type": file.type,
+            "x-amz-acl": "public-read", // Allow public access to the uploaded file
           },
         });
   
@@ -108,6 +115,12 @@ export default function SellItem() {
     try {
       // Upload images to S3 and get their URLs
       const imageUrls = await uploadImagesToS3(item.images);
+
+      const token = localStorage.getItem('token');
+      
+      if (!token && !user) {
+        throw new Error('Please log in to place an order');
+      }
   
       // Submit the item data along with the image URLs
       const itemData = {
@@ -115,7 +128,11 @@ export default function SellItem() {
         images: imageUrls, // Replace files with S3 URLs
       };
   
-      const response = await axios.post("http://localhost:5000/api/sell", itemData);
+      const response = await axios.post("http://localhost:5000/api/sell", itemData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       console.log("Item submitted:", response.data);
       alert("Item listed successfully!");
       navigate("/"); // Redirect to home page");

@@ -12,18 +12,20 @@ const {
 } = require('../controllers/products');
 const { protect, authorize } = require('../middleware/auth');
 
-router.route('/')
-  .get(getProducts)
-  .post(protect, authorize('seller', 'admin'), createProduct);
-
+// Public routes
+router.get('/', getProducts);
 router.get('/featured', getFeaturedProducts);
-router.get('/seller', protect, authorize('seller'), getSellerProducts);
+router.get('/:id', getProduct);
 
+// Protected routes
+router.use(protect);
+
+// Seller and admin routes
+router.post('/', authorize('seller', 'admin'), createProduct);
+router.get('/seller', authorize('seller'), getSellerProducts);
 router.route('/:id')
-  .get(getProduct)
-  .put(protect, authorize('seller', 'admin'), updateProduct)
-  .delete(protect, authorize('seller', 'admin'), deleteProduct);
-
-router.post('/:id/upload', protect, authorize('seller', 'admin'), uploadProductImage);
+  .put(authorize('seller', 'admin'), updateProduct)
+  .delete(authorize('seller', 'admin'), deleteProduct);
+router.post('/:id/upload', authorize('seller', 'admin'), uploadProductImage);
 
 module.exports = router;

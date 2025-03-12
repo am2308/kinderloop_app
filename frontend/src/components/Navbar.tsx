@@ -39,22 +39,6 @@ const Navbar = () => {
             </div>
           </div>
           
-          <div className="hidden md:flex items-center">
-            <div className="relative mx-2">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-emerald-300" />
-              </div>
-              <input
-                className="bg-emerald-700 block w-full pl-10 pr-3 py-2 rounded-md text-sm placeholder-emerald-300"
-                type="text"
-                placeholder="Search products..."
-              />
-            </div>
-            <Link to="/shop/cart" className="ml-4 p-2 rounded-full hover:bg-emerald-700">
-              <ShoppingBag className="h-6 w-6" />
-            </Link>
-          </div>
-          
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -122,14 +106,6 @@ const Navbar = () => {
                 placeholder="Search products..."
               />
             </div>
-            <Link 
-              to="/shop/cart" 
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium hover:bg-emerald-700"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ShoppingBag className="h-5 w-5 mr-2" />
-              Cart
-            </Link>
           </div>
         </div>
       )}

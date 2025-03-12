@@ -28,18 +28,16 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
-const uploadRoutes = require('./routes/upload'); // Import the new upload routes
-const sellRoutes = require('./routes/sell'); // Import the new sell routes
-
+const uploadRoutes = require('./routes/upload');
+const sellRoutes = require('./routes/sell');
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/upload', uploadRoutes); // Mount the new upload routes
-app.use('/api/sell', sellRoutes); // Mount the new sell routes
-
+app.use('/api/upload', uploadRoutes);
+app.use('/api/sell', sellRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

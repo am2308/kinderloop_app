@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 // @desc    Get all orders
 // @route   GET /api/orders
@@ -12,7 +13,7 @@ exports.getOrders = async (req, res) => {
         select: 'name email'
       })
       .populate({
-        path: 'products.product',
+        path: 'items.product',
         select: 'name price images'
       });
 
@@ -36,7 +37,7 @@ exports.getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id })
       .populate({
-        path: 'products.product',
+        path: 'items.product',
         select: 'name price images'
       });
 
@@ -64,27 +65,27 @@ exports.getSellerOrders = async (req, res) => {
 
     // Find orders containing these products
     const orders = await Order.find({
-      'products.product': { $in: productIds }
+      'items.product': { $in: productIds }
     })
       .populate({
         path: 'user',
         select: 'name email'
       })
       .populate({
-        path: 'products.product',
+        path: 'items.product',
         select: 'name price images seller'
       });
 
     // Filter out products that don't belong to this seller
     const filteredOrders = orders.map(order => {
-      const sellerProducts = order.products.filter(item => 
+      const sellerItems = order.items.filter(item => 
         item.product.seller && item.product.seller.toString() === req.user.id
       );
       
       return {
         _id: order._id,
         user: order.user,
-        products: sellerProducts,
+        items: sellerItems,
         shippingAddress: order.shippingAddress,
         status: order.status,
         createdAt: order.createdAt
@@ -115,7 +116,7 @@ exports.getOrder = async (req, res) => {
         select: 'name email'
       })
       .populate({
-        path: 'products.product',
+        path: 'items.product',
         select: 'name price images seller'
       });
 
@@ -129,7 +130,7 @@ exports.getOrder = async (req, res) => {
     // Check if user is owner of the order or admin
     if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
       // Check if user is seller of any product in the order
-      const isSeller = order.products.some(item => 
+      const isSeller = order.items.some(item => 
         item.product.seller && item.product.seller.toString() === req.user.id
       );
       
@@ -142,7 +143,7 @@ exports.getOrder = async (req, res) => {
       
       // If user is seller, filter products to only show their own
       if (isSeller && req.user.role === 'seller') {
-        order.products = order.products.filter(item => 
+        order.items = order.items.filter(item => 
           item.product.seller && item.product.seller.toString() === req.user.id
         );
       }
@@ -165,21 +166,25 @@ exports.getOrder = async (req, res) => {
 // @access  Private
 exports.createOrder = async (req, res) => {
   try {
-    const { products, shippingAddress, paymentMethod } = req.body;
+    const { items, shippingAddress, paymentMethod } = req.body;
 
-    if (!products || products.length === 0) {
+    if (!items || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'No products in the order'
+        message: 'No items in the order'
       });
     }
 
-    // Calculate prices and check product availability
-    let totalPrice = 0;
-    const orderProducts = [];
+    // Calculate total amount and check product availability
+    let totalAmount = 0;
+    const orderItems = [];
 
-    for (const item of products) {
-      const product = await Product.findById(item.product);
+    for (const item of items) {
+      const product = await Product.findOne({
+        $or: [{ _id: item.product || item.productId }, { productId: parseInt(item.productId) }]
+      });
+      
+      
       
       if (!product) {
         return res.status(404).json({
@@ -188,33 +193,37 @@ exports.createOrder = async (req, res) => {
         });
       }
       
-      if (product.status === 'sold') {
+      if (product.stock < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Product ${product.name} is already sold`
+          message: `Insufficient stock for product ${product.name}`
         });
       }
       
-      orderProducts.push({
+      orderItems.push({
         product: product._id,
-        quantity: item.quantity || 1,
+        quantity: item.quantity,
         price: product.price
       });
       
-      totalPrice += product.price * (item.quantity || 1);
+      totalAmount += product.price * item.quantity;
       
-      // Update product status to sold
-      product.status = 'sold';
+      // Update product stock
+      product.stock -= item.quantity;
+      if (product.stock === 0) {
+        product.status = 'sold';
+      }
       await product.save();
     }
 
     // Create order
     const order = await Order.create({
       user: req.user.id,
-      products: orderProducts,
+      items: orderItems,
       shippingAddress,
       paymentMethod,
-      totalPrice
+      totalAmount,
+      status: 'pending'
     });
 
     res.status(201).json({
@@ -241,6 +250,20 @@ exports.updateOrder = async (req, res) => {
         success: false,
         message: `No order found with id ${req.params.id}`
       });
+    }
+
+    // If status is being updated to cancelled, restore product stock
+    if (req.body.status === 'cancelled' && order.status !== 'cancelled') {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.stock += item.quantity;
+          if (product.status === 'sold') {
+            product.status = 'approved';
+          }
+          await product.save();
+        }
+      }
     }
 
     order = await Order.findByIdAndUpdate(req.params.id, req.body, {
@@ -274,11 +297,14 @@ exports.deleteOrder = async (req, res) => {
       });
     }
 
-    // Update product status back to approved
-    for (const item of order.products) {
+    // Restore product stock
+    for (const item of order.items) {
       const product = await Product.findById(item.product);
       if (product) {
-        product.status = 'approved';
+        product.stock += item.quantity;
+        if (product.status === 'sold') {
+          product.status = 'approved';
+        }
         await product.save();
       }
     }

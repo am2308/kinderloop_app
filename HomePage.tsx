@@ -71,31 +71,33 @@ const HomePage = () => {
               <ShoppingCart className="h-6 w-6" />
             </Link>
 
-            {/* User Icon and Name */}
+            {/* User Icon or Login/Signup Buttons */}
             {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex flex-col items-center space-y-1 text-gray-700 hover:text-emerald-600"
+                  className="text-gray-700 hover:text-emerald-600 flex items-center"
                 >
-                  <span className="text-sm font-medium">{user?.data?.name}</span>
                   <User className="h-6 w-6" />
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 transform translate-y-2">
                     <div className="py-1">
-                      <Link
-                        to="/listings"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Listed Items
-                      </Link>
-                      <Link
-                        to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Orders Placed
-                      </Link>
+                      <div className="px-4 py-2 text-sm text-gray-700">
+                        <p>{user.data.name}</p>
+                      </div>
+                        <Link
+                          to="/listings"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Listed Items
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Orders Placed
+                        </Link>
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -284,7 +286,7 @@ const HomePage = () => {
             <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
               <div className="h-64 overflow-hidden">
                 <img 
-                  src="https://images.pexels.com/photos/1741230/pexels-photo-1741230.jpeg" 
+                  src="https://images.unsplash.com/photo-1584661156681-540e80a162b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                   alt="Children's Book Set" 
                   className="w-full h-full object-cover"
                 />

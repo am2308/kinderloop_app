@@ -39,18 +39,20 @@ exports.getProducts = async (req, res) => {
     const reqQuery = { ...req.query };
 
     // Fields to exclude
-    const removeFields = ['select', 'sort', 'page', 'limit'];
+    const removeFields = ['select', 'sort', 'page', 'limit', 'search'];
     removeFields.forEach(param => delete reqQuery[param]);
 
     // Create query string
     let queryStr = JSON.stringify(reqQuery);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
-    // Finding resource
-    query = Product.find(JSON.parse(queryStr)).populate({
-      path: 'seller',
-      select: 'name'
-    });
+    // Basic query
+    query = Product.find(JSON.parse(queryStr));
+
+    // Search functionality
+    if (req.query.search) {
+      query = query.find({ $text: { $search: req.query.search } });
+    }
 
     // Select Fields
     if (req.query.select) {
@@ -71,11 +73,17 @@ exports.getProducts = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = await Product.countDocuments();
+    const total = await Product.countDocuments(JSON.parse(queryStr));
 
     query = query.skip(startIndex).limit(limit);
 
-    // Executing query
+    // Populate seller info
+    query = query.populate({
+      path: 'seller',
+      select: 'name'
+    });
+
+    // Execute query
     const products = await query;
 
     // Pagination result
@@ -114,7 +122,7 @@ exports.getProducts = async (req, res) => {
 // @access  Public
 exports.getFeaturedProducts = async (req, res) => {
   try {
-    const products = await Product.find({ featured: true })
+    const products = await Product.find({ featured: true, status: 'approved', stock: { $gt: 0 } })
       .populate({
         path: 'seller',
         select: 'name'
@@ -159,10 +167,16 @@ exports.getSellerProducts = async (req, res) => {
 // @access  Public
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate({
-      path: 'seller',
-      select: 'name'
-    });
+    //const product = await Product.findById(req.params.id).populate({
+    //  path: 'seller',
+    //  select: 'name'
+    //});
+
+    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(req.params.id).populate('seller', 'name');
+    } else {
+      product = await Product.findOne({ productId: parseInt(req.params.id) }).populate('seller', 'name');
+    }
 
     if (!product) {
       return res.status(404).json({
@@ -188,7 +202,6 @@ exports.getProduct = async (req, res) => {
 // @access  Private/Seller/Admin
 exports.createProduct = async (req, res) => {
   try {
-    // Add user to req.body
     req.body.seller = req.user.id;
 
     const product = await Product.create(req.body);

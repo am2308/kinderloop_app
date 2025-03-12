@@ -6,23 +6,22 @@ const OrderSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  products: [
-    {
-      product: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Product',
-        required: true
-      },
-      quantity: {
-        type: Number,
-        default: 1
-      },
-      price: {
-        type: Number,
-        required: true
-      }
+  items: [{
+    product: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Product',
+      required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: [1, 'Quantity must be at least 1']
+    },
+    price: {
+      type: Number,
+      required: true
     }
-  ],
+  }],
   shippingAddress: {
     street: {
       type: String,
@@ -47,7 +46,8 @@ const OrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    required: true
+    required: true,
+    enum: ['credit_card', 'paypal']
   },
   paymentResult: {
     id: String,
@@ -55,9 +55,10 @@ const OrderSchema = new mongoose.Schema({
     update_time: String,
     email_address: String
   },
-  totalPrice: {
+  totalAmount: {
     type: Number,
-    required: true
+    required: true,
+    min: [0, 'Total amount cannot be negative']
   },
   status: {
     type: String,
@@ -68,6 +69,20 @@ const OrderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Add index for better query performance
+OrderSchema.index({ user: 1, createdAt: -1 });
+
+// Virtual populate products
+OrderSchema.virtual('orderItems', {
+  ref: 'Product',
+  localField: 'items.product',
+  foreignField: '_id'
 });
 
 module.exports = mongoose.model('Order', OrderSchema);

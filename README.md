@@ -61,8 +61,7 @@
 
 1. Run MongoDB as a container:
     ```bash
-    docker pull akhilmittal510/mykinder_database:latest
-    docker run --name mongodb -d -p 27017:27017 akhilmittal510/mykinder_database:latest
+    docker run --name mongodb -d -p 27017:27017 mongo
     ```
 
 2. Access MongoDB shell:
@@ -112,7 +111,7 @@
 
 1. Run MongoDB container:
     ```bash
-    docker run --name mongodb --network kinderloop-network -d -p 27017:27017 akhilmittal510/mykinder_database:latest
+    docker run --name mongodb --network kinderloop-network -d -p 27017:27017 mongo
     ```
 
 2. Access MongoDB shell:

@@ -26,9 +26,12 @@ const Login = () => {
 
       if (response.ok) {
         console.log('Login successful:', data);
+        console.log('Login data:', data.user);
         // Save the token to localStorage
         localStorage.setItem('token', data.token);
-        await fetchUserDetails();
+        localStorage.setItem('user', JSON.stringify(data.user));
+        const res = await fetchUserDetails();
+        console.log("Fetch User Response:", res); // ✅ Debug API response
         // Update global state with user data
         // Show success message
         setSuccess(true);
