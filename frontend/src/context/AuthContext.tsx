@@ -93,18 +93,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       //const res = await axios.get('/api/auth/me');
 
       const token = localStorage.getItem('token'); // Get token from localStorage
+      console.log("🔐 Stored token:", token); // ✅ Debug token
       if (!token) {
         console.error("❌ No token found, user is not authenticated");
         setUser(null);
         setIsAuthenticated(false);
         return;
       }
-      const res = await axios.get('http://localhost:5000/api/auth/me', {
+      const res = await axios.get('http://localhost:5002/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`  // ✅ Pass the token in Authorization header
         }
       });
-      console.log("Fetch User Response:", res.data.data); // ✅ Debug API response
+      console.log("Fetch User Response:", res.data.data.data); // ✅ Debug API response
 
       if (res.data) {
         const userData = { ...res.data, id: res.data._id };
@@ -161,14 +162,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     //  id: res.data.user._id // Map _id to id for consistency
     //};
     const userData = res.data.user;
-    console.log("Storing userData in localStorage:", res.data);
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('user', JSON.stringify(userData));
-    console.log("User Demo Data:", localStorage.getItem('user'));
     axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
     setUser(userData);
     setIsAuthenticated(true);
-    console.log("✅ Login successful, stored user:", userData);
     //window.location.reload(); // Ensure correct state updates
   };
 

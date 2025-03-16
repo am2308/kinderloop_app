@@ -99,8 +99,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Get cart key based on user
   const getCartKey = () => {
-    if (!isAuthenticated || !user || !user.data || !user.data._id) return 'cart_guest';
-    return `cart_${user.data._id}`;
+    if (!isAuthenticated || !user || !user.data || !user.data.data || !user.data.data._id) return 'cart_guest';
+    return `cart_${user.data.data._id}`;
   };
   /*
   const getCartKey = () => {
@@ -112,7 +112,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   */
   // Debugging: Log user ID and cart key
-  console.log("User ID:", user?.data?._id);
+  console.log("User ID:", user?.data?.data?._id);
   console.log("Cart Key:", getCartKey());
 
   // Load cart from localStorage on mount and when user changes
@@ -141,7 +141,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => {
       dispatch({ type: 'CLEAR_CART' });
     };
-  }, [user?.data?._id, isAuthenticated]);
+  }, [user?.data?.data?._id, isAuthenticated]);
   /*
   // Load cart from localStorage on mount and when user changes
   useEffect(() => {
@@ -174,7 +174,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    if (isAuthenticated && user?.data?._id) {
+    if (isAuthenticated && user?.data?.data?._id) {
       const cartKey = getCartKey();
       try {
         localStorage.setItem(cartKey, JSON.stringify(state));
@@ -182,7 +182,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Error saving cart:', error);
       }
     }
-  }, [state, user?.data?._id, isAuthenticated]);
+  }, [state, user?.data?.data?._id, isAuthenticated]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
     for (let i = 0; i < quantity; i++) {

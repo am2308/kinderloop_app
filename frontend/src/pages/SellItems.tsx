@@ -61,7 +61,7 @@ export default function SellItem() {
     try {
       for (const file of files) {
         // Get a pre-signed URL from the backend for each file
-        const response = await axios.post("http://localhost:5000/api/upload/get-presigned-url", {
+        const response = await axios.post("http://localhost:5005/api/upload/get-presigned-url", {
           fileName: file.name,
           fileType: file.type,
         });
@@ -74,10 +74,10 @@ export default function SellItem() {
   
         // Upload the file to S3 using the pre-signed URL
         await axios.put(presignedUrl, file, {
-          headers: {
-            "Content-Type": file.type,
-            "x-amz-acl": "public-read", // Allow public access to the uploaded file
-          },
+          //headers: {
+          //  "Content-Type": file.type,
+            //"x-amz-acl": "public-read", // Allow public access to the uploaded file
+          //},
         });
   
         uploadedUrls.push(fileUrl);
@@ -128,7 +128,7 @@ export default function SellItem() {
         images: imageUrls, // Replace files with S3 URLs
       };
   
-      const response = await axios.post("http://localhost:5000/api/sell", itemData, {
+      const response = await axios.post("http://localhost:5005/api/sell", itemData, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -1,4 +1,4 @@
-import { API_BASE_URL, ENDPOINTS } from '../api/config';
+import { API_BASE_URL, PRODUCT_API_BASE_URL, ORDER_API_BASE_URL, ENDPOINTS } from '../api/config';
 import { Order, Product } from '../types/index';
 
 // Helper function to get auth token
@@ -13,7 +13,7 @@ const authHeaders = () => ({
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}${ENDPOINTS.products}`);
+    const response = await fetch(`${PRODUCT_API_BASE_URL}${ENDPOINTS.products}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch products: ${response.statusText}`);
     }
@@ -27,7 +27,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
 
 export const getProduct = async (id: string): Promise<Product> => {
   try {
-    const response = await fetch(`${API_BASE_URL}${ENDPOINTS.products}/${id}`);
+    const response = await fetch(`${PRODUCT_API_BASE_URL}${ENDPOINTS.products}/${id}`);
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || `Failed to fetch product: ${response.statusText}`);
@@ -42,7 +42,7 @@ export const getProduct = async (id: string): Promise<Product> => {
 
 export const createOrder = async (order: Omit<Order, '_id'>): Promise<Order> => {
   try {
-    const response = await fetch(`${API_BASE_URL}${ENDPOINTS.orders}`, {
+    const response = await fetch(`${ORDER_API_BASE_URL}${ENDPOINTS.orders}`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(order),
@@ -61,7 +61,7 @@ export const createOrder = async (order: Omit<Order, '_id'>): Promise<Order> => 
 
 export const getMyOrders = async (): Promise<Order[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}${ENDPOINTS.orders}/myorders`, {
+    const response = await fetch(`${ORDER_API_BASE_URL}${ENDPOINTS.orders}/myorders`, {
       headers: authHeaders(),
     });
     if (!response.ok) {
@@ -77,7 +77,7 @@ export const getMyOrders = async (): Promise<Order[]> => {
 
 export const getOrder = async (orderId: string): Promise<Order> => {
   try {
-    const response = await fetch(`${API_BASE_URL}${ENDPOINTS.orders}/${orderId}`, {
+    const response = await fetch(`${ORDER_API_BASE_URL}${ENDPOINTS.orders}/${orderId}`, {
       headers: authHeaders(),
     });
     if (!response.ok) {

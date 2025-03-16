@@ -26,12 +26,12 @@ export const getProducts = async (params: {
   page?: number;
   limit?: number;
 }): Promise<ProductsResponse> => {
-  const response = await axios.get('http://localhost:5000/api/products', { params });
+  const response = await axios.get('http://localhost:5003/api/products', { params });
   console.log("Product Details", params)
   return response.data;
 };
 
 export const getProduct = async (id: string): Promise<ProductResponse> => {
-  const response = await axios.get(`http://localhost:5000/api/products/${id}`);
+  const response = await axios.get(`http://localhost:5003/api/products/${id}`);
   return response.data;
 };

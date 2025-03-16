@@ -52,7 +52,7 @@ const ShopPage = () => {
         page: Number(currentPage),
         limit: 12
       });
-      const poduct_count = await axios.get('http://localhost:5000/api/products'); 
+      const poduct_count = await axios.get('http://localhost:5003/api/products'); 
       //poduct_count.data.count; // Assuming API returns { count: 18 }
       //console.log("Product API Response:", poduct_count.data?.pagination?.next?.page);
       //const totalRecords = response.count;

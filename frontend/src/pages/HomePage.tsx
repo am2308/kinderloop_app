@@ -78,7 +78,7 @@ const HomePage = () => {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex flex-col items-center space-y-1 text-gray-700 hover:text-emerald-600"
                 >
-                  <span className="text-sm font-medium">{user?.data?.name}</span>
+                  <span className="text-sm font-medium">{user?.data?.data?.name}</span>
                   <User className="h-6 w-6" />
                 </button>
                 {isDropdownOpen && (

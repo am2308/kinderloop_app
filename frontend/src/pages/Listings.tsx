@@ -44,7 +44,7 @@ const Listings = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/sell', {
+        const response = await axios.get('http://localhost:5005/api/sell', {
           headers: {
             Authorization: `Bearer ${token}`
           }

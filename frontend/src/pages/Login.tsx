@@ -14,7 +14,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:5002/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +45,6 @@ const Login = () => {
         setSuccess(false);
       }
     } catch (err) {
-      console.error('Error during login:', err);
       setError('An error occurred. Please try again.');
       setSuccess(false);
     }
