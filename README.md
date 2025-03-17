@@ -88,24 +88,24 @@
 
 1. Pull the frontend image:
     ```bash
-    docker pull akhilmittal510/kinderloop_frontend:latest
+    docker pull akhilmittal510/kinderloop_frontend:dynamic
     ```
 
 2. Run the frontend container:
     ```bash
-    docker run --name kinderloop_frontend --network kinderloop-network -p 5173:5173 -d akhilmittal510/kinderloop_frontend:latest
+    docker run --name kinderloop_frontend --network kinderloop-network -p 5173:5173 -d akhilmittal510/kinderloop_frontend:dynamic
     ```
 
 ### Backend Container
 
 1. Pull the backend image:
     ```bash
-    docker pull akhilmittal510/kinderloop_backend:latest
+    docker pull akhilmittal510/kinderloop_backend:dynamic
     ```
 
 2. Run the backend container:
     ```bash
-    docker run -d --name kinder_app_backend -p 5000:5000 --env-file .env --network kinderloop-network akhilmittal510/kinderloop_backend:latest akhilmittal510/kinderloop_backend:latest
+    docker run -d --name kinder_app_backend -p 5000:5000 --env-file .env --network kinderloop-network akhilmittal510/kinderloop_backend:dynamic
     ```
 
 ### MongoDB Container
